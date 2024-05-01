@@ -1,0 +1,21 @@
+services:
+  auto-meal-planner.db:
+    env_file:
+      - .env
+    image: ${DB_VER}
+    environment:
+      - MYSQL_ROOT_PASSORD=${DB_PASS}
+      - MYSQL_DATABASE=${DB_NAME}
+    volumes:
+      - automealplannerdbdata:/var/lib/mysql
+    ports:
+      - ${DB_PORT}
+
+    healthcheck:
+      test: ["CMD-SHELL",  "mysqladmin ping -h localhost -u root -p ${DB_PASS}"]
+      timeout: 20s
+      interval: 10s
+      retries: 5
+
+volumes:
+  automealplannerdbdata:
