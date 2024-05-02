@@ -4,7 +4,7 @@ services:
       - .env
     image: ${DB_VER}
     environment:
-      - MYSQL_ROOT_PASSORD=${DB_PASS}
+      - MYSQL_ROOT_PASSWORD=${DB_PASS}
       - MYSQL_DATABASE=${DB_NAME}
     volumes:
       - mealplannerdbdata:/var/lib/mysql
