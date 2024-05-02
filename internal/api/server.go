@@ -9,7 +9,6 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/go-chi/chi/v5"
 	"github.com/HiroAcocoro/meal-planner-app-server/internal/config"
 
   "github.com/go-chi/chi/v5"
@@ -38,8 +37,10 @@ func (s *Server) Start(ctx context.Context) {
     WriteTimeout: s.cfg.WriteTimeout,
   }
 
+  fmt.Printf("🚀 Server is running on port %d\n", s.cfg.Port)
+
   shutdownComplete := handleShutdown(func() {
-    if err := server.Shutdown(ctx); err != {
+    if err := server.Shutdown(ctx); err != nil {
       log.Printf("server.Shutdown failed: %v\n", err)
     }
   })
@@ -50,16 +51,16 @@ func (s *Server) Start(ctx context.Context) {
     log.Printf("http.ListenAndServe failed: %v\n", err)
   }
 
-  log.Println("Shutdown gracefully")
+  log.Println("😴 Shutdown gracefully")
 
 }
 
 func handleShutdown(onShutdownSignal func()) <- chan struct{} {
-  shutdown := make(chat struct{})
+  shutdown := make(chan struct{})
 
   go func() {
     shutdownSignal := make(chan os.Signal, 1)
-    signal.Notify(shutdownSignal, os.Interrupt,  syscal.SIGTERM)
+    signal.Notify(shutdownSignal, os.Interrupt, syscall.SIGTERM)
 
     <-shutdownSignal
 

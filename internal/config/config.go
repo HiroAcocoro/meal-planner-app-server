@@ -1,10 +1,15 @@
 package config
 
 import (
+  "os"
+  "fmt"
 	"time"
 
-	"github.com/joho/godotenv"
+  "github.com/joho/godotenv"
+	"github.com/kelseyhightower/envconfig"
 )
+
+const envPrefix = "API"
 
 type Configuration struct {
 	HTTPServer
@@ -18,10 +23,16 @@ type HTTPServer struct {
 }
 
 func Load() (Configuration, error) {
-	cfg := Configuration
-	err := godotenv.Load()
-	if err != nil {
-		return cfg, err
+  errEnv := godotenv.Load("../../.env")
+  if errEnv != nil {
+    fmt.Printf("Error loading .env file: %v\n", errEnv)
+    os.Exit(1)
+  }
+
+	var cfg Configuration
+	errCfg := envconfig.Process(envPrefix, &cfg)
+	if errCfg != nil {
+		return cfg, errCfg
 	}
 
 	return cfg, nil
