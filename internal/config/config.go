@@ -23,7 +23,7 @@ type HTTPServer struct {
 }
 
 func Load() (Configuration, error) {
-  errEnv := godotenv.Load("../../.env")
+  errEnv := godotenv.Load(".env")
   if errEnv != nil {
     fmt.Printf("Error loading .env file: %v\n", errEnv)
     os.Exit(1)
