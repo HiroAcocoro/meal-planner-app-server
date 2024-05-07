@@ -1,1 +1,1 @@
-CREATE SCHEMA IF NOT EXISTS auto-meal-planner
+CREATE SCHEMA IF NOT EXISTS auto_meal_planner
