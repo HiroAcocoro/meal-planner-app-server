@@ -9,7 +9,7 @@ services:
     volumes:
       - mysql_db_data:/var/lib/mysql
     ports:
-      - "33060:3306"
+      - "3306:3306"
 
     healthcheck:
       test: "mysql -uroot -p${DB_PASS} ${DB_NAME} -e 'select 1'"
