@@ -17,21 +17,26 @@ services:
       interval: 10s
       retries: 5
 
-  meal-planner.db.migrations:
+  server:
+    build:
+      context: ../
+      dockerfile: deployments/Dockerfile
+    restart: on-failure
+    volumes:
+      - .:/go/src/server
+    ports: 
+      - "8080:8080"
     env_file:
       - .env
+    environment:
+      DB_HOST: meal-planner.db
+      DB_USER: root
+      DB_PASSWORD: ${DB_PASS}
+      DB_NAME: ${DB_NAME}
+    links:
+      - meal-planner.db
     depends_on:
-      meal-planner.db:
-        condition: service_healthy
-    image: meal-planner.db.migrations
-    build:
-      context: ../db/
-      dockerfile: Dockerfile
-      args:
-        - DB_PASS=${DB_PASS}
-        - DB_NAME=${DB_NAME}
-        - DB_PORT=${DB_PORT}
-    command: "'mysql://root:secret@tcp(meal-planner.db:3306)/meal_planner_app_server_db' up"
+      - meal-planner.db
 
 volumes:
   mysql_db_data:
