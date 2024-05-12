@@ -20,11 +20,11 @@ services:
   server:
     build:
       context: ../
-      dockerfile: deployments/Dockerfile
+      dockerfile: deployments/Dockerfile.dev
     restart: on-failure
     volumes:
       - .:/go/src/server
-    ports: 
+    ports:
       - "8080:8080"
     env_file:
       - .env
