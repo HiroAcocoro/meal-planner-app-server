@@ -42,5 +42,5 @@ jobs:
         echo DB_NAME=${{ secrets.DB_NAME }} >> .env
         echo DB_PORT=${{ secrets.DB_PORT }} >> .env
         echo API_PORT=${{ secrets.API_PORT }} >> .env
-        docker-compose build --no-cache -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+        docker-compose -f /deployments/docker-compose.yml build --no-cache -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
