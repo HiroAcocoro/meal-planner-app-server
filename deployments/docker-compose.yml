@@ -9,7 +9,7 @@ services:
     volumes:
       - mysql_db_data:/var/lib/mysql
     ports:
-      - "3306:3306"
+      - "${DB_PORT}:${DB_PORT}"
 
     healthcheck:
       test: "mysql -uroot -p${DB_PASS} ${DB_NAME} -e 'select 1'"
@@ -20,14 +20,16 @@ services:
   server:
     build:
       context: ../
-      dockerfile: deployments/Dockerfile.dev
+      dockerfile: deployments/Dockerfile
+      args:
+        API_PORT: ${API_PORT}
     restart: on-failure
     volumes:
       - .:/go/src/server
-    ports:
-      - "8080:8080"
     env_file:
       - .env
+    ports:
+      - "${API_PORT}:${API_PORT}"
     environment:
       DB_HOST: meal-planner.db
       DB_USER: root
