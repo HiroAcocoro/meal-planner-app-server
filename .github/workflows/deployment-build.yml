@@ -37,5 +37,5 @@ jobs:
         IMAGE_TAG: ${{ steps.increment-git-tag.outputs.git-tag }}
         API_PORT: ${{ secrets.API_PORT }}
       run: |
-        docker-build -f /deployments/Dockerfile --build-arg API_PORT=$API_PORT -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+        docker build -f /deployments/Dockerfile --build-arg API_PORT=$API_PORT -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
