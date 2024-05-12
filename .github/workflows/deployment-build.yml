@@ -35,12 +35,7 @@ jobs:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         ECR_REPOSITORY: ${{ secrets.AWS_ECR_REPO_NAME }}
         IMAGE_TAG: ${{ steps.increment-git-tag.outputs.git-tag }}
+        API_PORT: ${{ secrets.API_PORT }}
       run: |
-        touch .env
-        echo DB_VER=${{ secrets.DB_VER }} >> .env
-        echo DB_PASS=${{ secrets.DB_PASS }} >> .env
-        echo DB_NAME=${{ secrets.DB_NAME }} >> .env
-        echo DB_PORT=${{ secrets.DB_PORT }} >> .env
-        echo API_PORT=${{ secrets.API_PORT }} >> .env
-        docker-compose -f /deployments/docker-compose.yml build --no-cache -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+        docker-build -f /deployments/Dockerfile --build-arg API_PORT=$API_PORT -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
