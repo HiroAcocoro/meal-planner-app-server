@@ -25,19 +25,22 @@ func (s *APIServer) Run() error {
 	router := http.NewServeMux()
 	// @TODO subrouters
 
+  apiRouter := http.NewServeMux()
+  apiRouter.Handle("/api/", http.StripPrefix("/api", router))
+
 	// user handler
 	userStore := user.NewStore(s.db)
 	userHandler := user.NewHandler(userStore)
 	userHandler.RegisterRoutes(router)
 
 	// middleware
-	stack := middlewares.CreateStack(
+	middlewareStack := middlewares.CreateStack(
 		middlewares.AllowCors,
 	)
 
 	server := http.Server{
 		Addr:    s.addr,
-		Handler: stack(router),
+		Handler: middlewareStack(apiRouter),
 	}
 
 	log.Println("🚀  Server is running on port", s.addr)
