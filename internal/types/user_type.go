@@ -26,3 +26,6 @@ type LoginUserPayload struct {
 	Email    string `json:"email"    validate:"required,email"`
 	Password string `json:"password" validate:"required"`
 }
+
+type contextKey string
+const UserKey contextKey = "userId"
