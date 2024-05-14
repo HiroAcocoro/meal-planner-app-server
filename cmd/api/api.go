@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/HiroAcocoro/meal-planner-app-server/internal/middlewares"
+	"github.com/HiroAcocoro/meal-planner-app-server/internal/services/test"
 	"github.com/HiroAcocoro/meal-planner-app-server/internal/services/user"
 )
 
@@ -25,19 +26,28 @@ func (s *APIServer) Run() error {
 	router := http.NewServeMux()
 	// @TODO subrouters
 
+	apiRouter := http.NewServeMux()
+	apiRouter.Handle("/api/", http.StripPrefix("/api", router))
+
 	// user handler
 	userStore := user.NewStore(s.db)
 	userHandler := user.NewHandler(userStore)
 	userHandler.RegisterRoutes(router)
 
-	// middleware
-	stack := middlewares.CreateStack(
+	// test handler
+	testHandler := test.NewHandler(userStore)
+	testHandler.RegisterRoutes(router)
+
+	// middlewares
+	middlewareHandler := middlewares.NewHandler(userStore)
+	middlewareStack := middlewares.CreateStack(
 		middlewares.AllowCors,
+		middlewares.IsAuthenticated,
 	)
 
 	server := http.Server{
 		Addr:    s.addr,
-		Handler: stack(router),
+		Handler: middlewareStack(apiRouter, middlewareHandler),
 	}
 
 	log.Println("🚀  Server is running on port", s.addr)
