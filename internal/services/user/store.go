@@ -72,7 +72,6 @@ func (s *Store) GetUserById(id string) (*types.User, error) {
 	}
 
 	return user, nil
-
 }
 
 func (s *Store) CreateUser(user types.User) error {
