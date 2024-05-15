@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"log"
@@ -31,8 +32,9 @@ func main() {
 
 	initMysql(db)
 
-  server := api.NewAPIServer(fmt.Sprintf(":%s", config.Env.APIPort), db)
-	if err := server.Run(); err != nil {
+	server := api.NewAPIServer(fmt.Sprintf(":%s", config.Env.APIPort), db)
+	ctx := context.Background()
+	if err := server.Start(ctx); err != nil {
 		errors.LogFatalError(err)
 	}
 }

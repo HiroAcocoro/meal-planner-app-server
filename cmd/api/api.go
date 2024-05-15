@@ -1,9 +1,13 @@
 package api
 
 import (
+	"context"
 	"database/sql"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/HiroAcocoro/meal-planner-app-server/internal/middlewares"
 	"github.com/HiroAcocoro/meal-planner-app-server/internal/services/test"
@@ -22,7 +26,7 @@ func NewAPIServer(addr string, db *sql.DB) *APIServer {
 	}
 }
 
-func (s *APIServer) Run() error {
+func (s *APIServer) Start(ctx context.Context) error {
 	router := http.NewServeMux()
 	// @TODO subrouters
 
@@ -52,5 +56,35 @@ func (s *APIServer) Run() error {
 
 	log.Println("🚀  Server is running on port", s.addr)
 
+	shutdownComplete := handleShutdown(func() {
+		if err := server.Shutdown(ctx); err != nil {
+			log.Printf("server.Shutdown failed: %v\n", err)
+		}
+	})
+
+	if err := server.ListenAndServe(); err == http.ErrServerClosed {
+		<-shutdownComplete
+	} else {
+		log.Printf("http.ListenAndServe failed: %v\n", err)
+	}
+
+	log.Println("😴  Shutdown gracefully")
+
 	return server.ListenAndServe()
+}
+
+func handleShutdown(onShutdownSignal func()) <-chan struct{} {
+	shutdown := make(chan struct{})
+
+	go func() {
+		shutdownSignal := make(chan os.Signal, 1)
+		signal.Notify(shutdownSignal, os.Interrupt, syscall.SIGTERM)
+
+		<-shutdownSignal
+
+		onShutdownSignal()
+		close(shutdown)
+	}()
+
+	return shutdown
 }
