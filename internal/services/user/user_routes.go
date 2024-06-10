@@ -23,6 +23,7 @@ func NewHandler(store types.UserStore) *Handler {
 func (h *Handler) RegisterRoutes(router *http.ServeMux) {
 	router.HandleFunc("POST /signin", h.handleSignin)
 	router.HandleFunc("POST /signup", h.handleSignup)
+	router.HandleFunc("POST /refresh-token", h.handleRefreshToken)
 }
 
 func (h *Handler) handleSignin(w http.ResponseWriter, r *http.Request) {
@@ -65,7 +66,21 @@ func (h *Handler) handleSignin(w http.ResponseWriter, r *http.Request) {
 		utils.WriteError(w, http.StatusInternalServerError, err)
 		return
 	}
-	utils.WriteJSON(w, http.StatusOK, map[string]string{"token": token})
+
+	// create cookie
+	cookie, err := auth.CreateJwtCookie(secret, user.Id)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	http.SetCookie(w, &cookie)
+
+	utils.WriteJSON(
+		w,
+		http.StatusOK,
+		map[string]string{"accessToken": token, "refreshToken": cookie.Value},
+	)
 }
 
 func (h *Handler) handleSignup(w http.ResponseWriter, r *http.Request) {
@@ -115,4 +130,57 @@ func (h *Handler) handleSignup(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.WriteJSON(w, http.StatusCreated, nil)
+}
+
+func (h *Handler) handleRefreshToken(w http.ResponseWriter, r *http.Request) {
+	refreshTokenCookie, err := r.Cookie("refreshToken")
+	if err != nil {
+		if err == http.ErrNoCookie {
+			utils.WriteError(w, http.StatusUnauthorized, err)
+			return
+		}
+		utils.WriteError(w, http.StatusUnauthorized, err)
+    return
+	}
+
+	refreshToken := refreshTokenCookie.Value
+
+	// Validate the refresh token
+	if !auth.IsValidRefreshToken(refreshToken) {
+		utils.WriteError(w, http.StatusUnauthorized, fmt.Errorf("invalid refresh token"))
+    return
+	}
+
+	secret := []byte(config.Env.JWTSecret)
+
+	parsedRefreshToken, err := auth.ParseRefreshJwt(refreshToken)
+	
+	if err != nil {
+		utils.WriteError(w, http.StatusUnauthorized, err)
+
+	}
+
+	userId := auth.GetUserIdByToken(parsedRefreshToken)
+
+	// create token
+	token, err := auth.CreateJwt(secret, userId)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	// create cookie
+	cookie, err := auth.CreateJwtCookie(secret, userId)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	http.SetCookie(w, &cookie)
+
+	utils.WriteJSON(
+		w,
+		http.StatusOK,
+		map[string]string{"accessToken": token, "refreshToken": cookie.Value},
+	)
 }
