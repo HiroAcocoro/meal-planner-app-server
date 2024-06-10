@@ -11,15 +11,16 @@ import (
 )
 
 type Config struct {
-	APIPort       string
-	DBHost        string
-	DBPort        string
-	DBUser        string
-	DBPass        string
-	DBAddr        string
-	DBName        string
-	JWTSecret     string
-	JWTExpiration int64
+	APIPort              string
+	DBHost               string
+	DBPort               string
+	DBUser               string
+	DBPass               string
+	DBAddr               string
+	DBName               string
+	JWTSecret            string
+	JWTExpiration        int64
+	JWTRefreshExpiration int64
 }
 
 var Env = initConfig()
@@ -40,8 +41,9 @@ func initConfig() Config {
 			getEnv("DB_HOST", "127.0.0.1"),
 			getEnv("DB_PORT", "3306"),
 		),
-		JWTSecret:     getEnv("JWT_SECRET", "secret"),
-		JWTExpiration: getEnvAsInt("JWT_EXP", 3600*24*7),
+		JWTSecret:            getEnv("JWT_SECRET", "secret"),
+		JWTExpiration:        getEnvAsInt("JWT_EXP", 3600),
+		JWTRefreshExpiration: getEnvAsInt("JWT_REFRESH_EXP", 2592000),
 	}
 }
 
